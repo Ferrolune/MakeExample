@@ -11,6 +11,7 @@ supported file types is
  .h in inc/c/h and inc/cxx/h
 
  .a in lib/a
+ 
  .so is not supported yet
 
  
@@ -18,11 +19,15 @@ supported file types is
 ruleset that is included for make
 
 cxxrel: compiles to a C++ release build
+
 cxxdbg: compiles to a C++ debug build
+
 libxx : compiles to a C++ library
 
 crel: compiles to a C release build
+
 cdbg: compiles to a C debug build
+
 clib: compiles to a C library
 
 clean: removes bin and obj folders created during build.
