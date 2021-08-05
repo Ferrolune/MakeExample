@@ -1,4 +1,3 @@
-#MakeExample
 This Makefile is for basic local c/c++ programming
 
 To get started, once cloned, run "make setup" to create the basic file structure
