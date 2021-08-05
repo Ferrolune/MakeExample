@@ -18,8 +18,8 @@ after cloning,
  3. inc/c/h 
   * .h for c headers
  5. inc/cxx/h 
-  * .h for c++ headers
- 7. lib/a 
+  * .hxx for c++ headers
+ 7. lib/a
   * .a for static libraries
  6  lib/so 
   * .so for shared libraries
