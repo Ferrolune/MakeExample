@@ -1,36 +1,16 @@
+
+# Makefile Example Structure System
 This Makefile is for basic local c/c++ programming
 
-To get started, once cloned, run "make setup" to create the basic file structure
+# Setting Things Up
+after cloning,
 
-supported file types is 
+1. run make setup to create the basic file structure
+2. run make help for recipes.
 
+# Supported Files
  .c and .clib in src/c
-
  .cxx and .libxx in src/cxx
-
  .h in inc/c/h and inc/cxx/h
-
  .a in lib/a
- 
  .so in lib/so
-
-The following commands exist:
- help; shows this menu
-
- setup; create base folder structure
-
- crel; creates a release executable from c code
-
- cdbg; creates a debug executable from c code
-
- cxxrel; creates a release executable from c++ code
-
- cxxdbg; creates a debug executable from c++ code
-
- shared; required for shared library creation, used with clib or libxx
-
- static; required for static library creation, used with clib or libxx
-
- clib; creates a library from c code
-
- libxx; creates a library from c++ code
