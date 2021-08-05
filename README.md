@@ -3,6 +3,7 @@ This Makefile is for basic local c/c++ programming
 To get started, once cloned, run "make setup" to create the basic file structure
 
 supported file types is 
+
  .c and .clib in src/c
 
  .cxx and .libxx in src/cxx
