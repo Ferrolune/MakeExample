@@ -1,37 +1,36 @@
 #MakeExample
+This Makefile is for basic local c/c++ programming
 
-understand that the design of this uses the following layout as seen in the folder view
-the makefile expects files to exist in their proper folder.
+To get started, once cloned, run "make setup" to create the basic file structure
 
 supported file types is 
  .c and .clib in src/c
- 
+
  .cxx and .libxx in src/cxx
 
  .h in inc/c/h and inc/cxx/h
 
  .a in lib/a
  
- .so is not supported yet
+ .so in lib/so
 
- 
+The following commands exist:
+ help; shows this menu
 
-ruleset that is included for make
+ setup; create base folder structure
 
-cxxrel: compiles to a C++ release build
+ crel; creates a release executable from c code
 
-cxxdbg: compiles to a C++ debug build
+ cdbg; creates a debug executable from c code
 
-libxx : compiles to a C++ library
+ cxxrel; creates a release executable from c++ code
 
-crel: compiles to a C release build
+ cxxdbg; creates a debug executable from c++ code
 
-cdbg: compiles to a C debug build
+ shared; required for shared library creation, used with clib or libxx
 
-clib: compiles to a C library
+ static; required for static library creation, used with clib or libxx
 
-clean: removes bin and obj folders created during build.
+ clib; creates a library from c code
 
-
-
-
+ libxx; creates a library from c++ code
