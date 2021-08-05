@@ -355,7 +355,8 @@ else
 endif
 
 
-
+#Utils
+.PHONY: setup
 setup:
 	mkdir -p src
 	mkdir -p src/c
@@ -369,6 +370,7 @@ setup:
 	mkdir -p inc/c/h
 	mkdir -p inc/cxx/h
 
+.PHONY: help
 help:
 	@echo "The following commands exist:"
 	@echo "help; shows this menu"
@@ -381,11 +383,9 @@ help:
 	@echo "static; required for static library creation, used with clib or libxx"
 	@echo "clib; creates a library from c code"
 	@echo "libxx; creates a library from c++ code"
-#Utils
+
 .PHONY: clean
 clean:
 	rm -rf $(BIN_DIR)
 	rm -rf $(BUILD_DIR)
 	@echo "Cleaning Finished!"
-
-
