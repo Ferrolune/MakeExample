@@ -119,12 +119,12 @@ LIB_DIR     := lib/
 
 #Output Name
 EXECUTABLE  := $(BIN_DIR)main
-
+LIBRARYNAME := $(BIN_DIR)lib
 
 #Subdirectories
 OBJ_DIR     := $(BUILD_DIR)obj/
-OBJ_DIR_LC   := $(OBJ_DIR)libs/c/
-OBJ_DIR_LXX   := $(OBJ_DIR)libs/cxx/
+OBJ_DIR_LC  := $(OBJ_DIR)libs/c/
+OBJ_DIR_LXX := $(OBJ_DIR)libs/cxx/
 
 OBJ_DIR_C   := $(OBJ_DIR)prog/c/
 OBJ_DIR_CXX := $(OBJ_DIR)prog/cxx/
@@ -153,6 +153,8 @@ CXXSRC      := $(wildcard $(CXX_DIR)*.cpp)
 CXXINC      := $(wildcard $(CXX_H_DIR)*.h)
 CXXOBJS     := $(notdir $(CXXSRC:.cpp=.o))
 
+LIBXX        := $(wildcard $(CXX_DIR)*.libxx)
+LIBXX_OBJ    := $(notdir $(LIBXX:.libxx=.o))
 
 
 #CXXOBJS    := $(patsubst %.cpp,%.o,$(CXXSRC))
@@ -175,8 +177,8 @@ LINKER_OPT   := -L $(LIB_A_DIR) $(ALIBS) -L $(LIB_SO_DIR) $(SOLIBS)
 
 #Commands
 
+#cxxrel/cxxdbg compile
 $(OBJ_DIR_CXX)$(CXXOBJS): $(CXXINC) $(CXXSRC)
-	@echo $(shell echo "$(MAKECMDGOALS)" | grep "cxxrel")
 	mkdir -p $(BUILD_DIR)
 	mkdir -p $(OBJ_DIR)
 	mkdir -p $(OBJ_DIR_CXX)
@@ -189,7 +191,7 @@ else
 endif
 	mv *.o $(OBJ_DIR_CXX)
 
-
+#crel/cdbg compile
 $(OBJ_DIR_C)$(COBJS): $(CINC) $(CSRC)
 	mkdir -p $(BUILD_DIR)
 	mkdir -p $(OBJ_DIR)
@@ -198,19 +200,21 @@ ifeq ($(shell echo "$(MAKECMDGOALS)" | grep "crel"),crel)
 	@echo Building release for the C Project!
 	$(C_RELEASE) -c $(CSRC) -I $(C_H_DIR)
 else
-	$(C_DEBUG) -c $(CSRC) -I $(C_H_DIR)
 	@echo Building debug for the C Project!
+	$(C_DEBUG) -c $(CSRC) -I $(C_H_DIR)
 endif
 	mv *.o $(OBJ_DIR_C)
 
 
 #C++ Rules
+#linking for c++ debug
 cxxdbg: $(OBJ_DIR_CXX)$(CXXOBJS)
 	mkdir -p $(BIN_DIR)
 	@echo "Linking Debug for the C++ Project!"
 	$(CXX_DEBUG) $(patsubst %,$(OBJ_DIR_CXX)%,$(CXXOBJS)) $(LINKER_OPT) -o $(EXECUTABLE)
 	@echo "Done"
 
+#linking for c++ release
 cxxrel: $(OBJ_DIR_CXX)$(CXXOBJS)
 	mkdir -p $(BIN_DIR)
 	@echo "Linking Release for the C++ Project!"
@@ -219,12 +223,14 @@ cxxrel: $(OBJ_DIR_CXX)$(CXXOBJS)
 
 
 #C Rules
+#linking for c release
 crel: $(OBJ_DIR_C)$(COBJS)
 	mkdir -p $(BIN_DIR)
 	@echo "Linking Release for the C Project!"
 	$(C_RELEASE) $(patsubst %,$(OBJ_DIR_C)%,$(COBJS)) $(LINKER_OPT) -o $(EXECUTABLE)
 	@echo "Done"
 
+#linking for c debug
 cdbg: $(OBJ_DIR_C)$(COBJS)
 	mkdir -p $(BIN_DIR)
 	@echo "Linking Release for the C Project!"
@@ -232,22 +238,41 @@ cdbg: $(OBJ_DIR_C)$(COBJS)
 	@echo "Done"
 
 
+#c
 $(OBJ_DIR_LC)$(CLIB_OBJ): $(CINC) $(CLIB)
+ifneq ($(shell echo "$(MAKECMDGOALS)" | grep "clib static"),clib static)
+ifneq ($(shell echo "$(MAKECMDGOALS)" | grep "clib shared"),clib shared)
+	@echo "Recipe arguments are incomplete; missing shared or static after clib"
+	@exit 1
+endif
+endif
 	mkdir -p $(BUILD_DIR)
 	mkdir -p $(OBJ_DIR)
 	mkdir -p $(OBJ_DIR)libs/
 	mkdir -p $(OBJ_DIR_LC)
 
 	@echo "Compiling C Library Code..."
-	$(C_DEBUG) -x c -c $(CLIB) -I $(C_H_DIR)
+
+ifeq ($(shell echo "$(MAKECMDGOALS)" | grep "clib static"),clib static)
+	$(C_RELEASE) -x c -c $(CLIB) -I $(C_H_DIR)
 	mv *.o $(OBJ_DIR_LC)
+endif
+
+ifeq ($(shell echo "$(MAKECMDGOALS)" | grep "clib shared"),clib shared)
+	$(C_RELEASE) -x c -c $(CLIB) -I $(C_H_DIR) -shared
+	mv *.o $(OBJ_DIR_LC)
+endif
+
 
 
 #CXXSRC      := $(wildcard $(CXX_DIR)*.cpp)
-LIBXX        := $(wildcard $(CXX_DIR)*.libxx)
-LIBXX_OBJ    := $(notdir $(LIBXX:.libxx=.o))
-
 $(OBJ_DIR_LXX)$(LIBXX_OBJ): $(CXXINC) $(LIBXX)
+ifneq ($(shell echo "$(MAKECMDGOALS)" | grep "libxx static"),libxx static)
+ifneq ($(shell echo "$(MAKECMDGOALS)" | grep "libxx shared"),libxx shared)
+	@echo "Recipe arguments are incomplete; missing shared or static after libxx"
+	@exit 1
+endif
+endif
 	mkdir -p $(BUILD_DIR)
 	mkdir -p $(OBJ_DIR)
 	mkdir -p $(OBJ_DIR)libs/
@@ -255,29 +280,112 @@ $(OBJ_DIR_LXX)$(LIBXX_OBJ): $(CXXINC) $(LIBXX)
 	@echo $(LIBXX)
 
 	@echo "Compiling C++ Library Code..."
-	$(CXX_DEBUG) -x c++ -c $(LIBXX) -I $(CXX_H_DIR)
+ifeq ($(shell echo "$(MAKECMDGOALS)" | grep "libxx static"),libxx static)
+	$(CXX_RELEASE) -x c++ -c $(LIBXX) -I $(CXX_H_DIR)
+endif
+
+ifeq ($(shell echo "$(MAKECMDGOALS)" | grep "libxx shared"),libxx shared)
+	$(CXX_RELEASE) -x c++ -c $(LIBXX) -I $(CXX_H_DIR)
+endif
+
 	mv *.o $(OBJ_DIR_LXX)
 
 
 #Library Rules
-#todo: expand functionality with ifeq to allow compiling to shared or static libraries using for example "make libxx static" or "make libxx shared"
 libxx: $(OBJ_DIR_LXX)$(LIBXX_OBJ)
+ifneq ($(shell echo "$(MAKECMDGOALS)" | grep "libxx static"),libxx static)
+ifneq ($(shell echo "$(MAKECMDGOALS)" | grep "libxx shared"),libxx shared)
+	@echo "Recipe arguments are incomplete; missing shared or static after libxx"
+	@exit 1
+endif
+endif
 	@echo "Creating C++ Library..."
-	ar rcs a.a $(OBJ_DIR_LXX)$(LIBXX_OBJ)
 	mkdir -p $(BIN_DIR)
-	mv a.a $(BIN_DIR)
+ifeq ($(shell echo "$(MAKECMDGOALS)" | grep "libxx static"),libxx static)
+	ar rcs $(LIBRARYNAME).a $(OBJ_DIR_LCXX)$(LXX_OBJ)
+endif
+
+ifeq ($(shell echo "$(MAKECMDGOALS)" | grep "libxx shared"),libxx shared)
+	ar rcs $(LIBRARYNAME).so $(OBJ_DIR_LCXX)$(LXX_OBJ)
+endif
 	@echo "Done"
 
 clib: $(OBJ_DIR_LC)$(CLIB_OBJ)
-	@echo "Creating C++ Library..."
-	ar rcs a.a $(OBJ_DIR_LC)$(CLIB_OBJ)
+ifneq ($(shell echo "$(MAKECMDGOALS)" | grep "clib static"),clib static)
+ifneq ($(shell echo "$(MAKECMDGOALS)" | grep "clib shared"),clib shared)
+	@echo "Recipe arguments are incomplete; missing shared or static after clib"
+	@exit 1
+endif
+endif
+	@echo "Creating C Library..."
 	mkdir -p $(BIN_DIR)
-	mv a.a $(BIN_DIR)
+ifeq ($(shell echo "$(MAKECMDGOALS)" | grep "clib static"),clib static)
+	ar rcs $(LIBRARYNAME).a $(OBJ_DIR_LC)$(CLIB_OBJ)
+endif
+
+ifeq ($(shell echo "$(MAKECMDGOALS)" | grep "clib shared"),clib shared)
+	ar rcs $(LIBRARYNAME).so $(OBJ_DIR_LC)$(CLIB_OBJ)
+endif
 	@echo "Done"
 
+
+
+shared:
+ifneq ($(shell echo "$(MAKECMDGOALS)" | grep "clib shared"),clib shared)
+ifneq ($(shell echo "$(MAKECMDGOALS)" | grep "libxx shared"),libxx shared)
+	@echo "You must use this in combination with clib or libxx recipes"
+	@exit 1;
+else
+	@echo "Created Shared C++ Library"
+endif
+else
+	@echo "Created Shared C Library"
+endif
+
+static:
+ifneq ($(shell echo "$(MAKECMDGOALS)" | grep "clib static"),clib static)
+ifneq ($(shell echo "$(MAKECMDGOALS)" | grep "libxx static"),libxx static)
+	@echo "You must use this in combination with clib or libxx recipes"
+	@exit 1;
+else
+	@echo "Created Static C++ Library"
+endif
+else
+	@echo "Created Static C Library"
+endif
+
+
+
+setup:
+	mkdir -p src
+	mkdir -p src/c
+	mkdir -p src/cxx
+	mkdir -p lib
+	mkdir -p lib/a
+	mkdir -p lib/so
+	mkdir -p inc
+	mkdir -p inc/c
+	mkdir -p inc/cxx
+	mkdir -p inc/c/h
+	mkdir -p inc/cxx/h
+
+help:
+	@echo "The following commands exist:"
+	@echo "help; shows this menu"
+	@echo "setup; create base folder structure"
+	@echo "crel; creates a release executable from c code"
+	@echo "cdbg; creates a debug executable from c code"
+	@echo "cxxrel; creates a release executable from c++ code"
+	@echo "cxxdbg; creates a debug executable from c++ code"
+	@echo "shared; required for shared library creation, used with clib or libxx"
+	@echo "static; required for static library creation, used with clib or libxx"
+	@echo "clib; creates a library from c code"
+	@echo "libxx; creates a library from c++ code"
 #Utils
 .PHONY: clean
 clean:
 	rm -rf $(BIN_DIR)
 	rm -rf $(BUILD_DIR)
 	@echo "Cleaning Finished!"
+
+
