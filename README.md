@@ -21,5 +21,5 @@ after cloning,
   * .hxx for c++ headers
  7. lib/a
   * .a for static libraries
- 6  lib/so 
+ 8  lib/so 
   * .so for shared libraries
