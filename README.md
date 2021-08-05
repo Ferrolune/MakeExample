@@ -9,8 +9,8 @@ after cloning,
 2. run make help for recipes.
 
 # Supported Files
- .c and .clib in src/c
- .cxx and .libxx in src/cxx
- .h in inc/c/h and inc/cxx/h
- .a in lib/a
- .so in lib/so
+ * .c and .clib in src/c
+ * .cxx and .libxx in src/cxx
+ * .h in inc/c/h and inc/cxx/h
+ * .a in lib/a
+ * .so in lib/so
